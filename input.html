@@ -1,0 +1,275 @@
+<html>
+<meta charset="utf-8">
+
+<style>
+	.node {
+		cursor: pointer;
+	}
+
+	.node circle {
+		fill: #fff;
+		stroke: steelblue;
+		stroke-width: 1.5px;
+	}
+
+	.found {
+		fill: #ff4136;
+		stroke: #ff4136;
+	}
+	.node text {
+		font: 10px sans-serif;
+	}
+
+	.link {
+		fill: none;
+		stroke: #ccc;
+		stroke-width: 1.5px;
+	}
+</style>
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.0/select2.min.css"></link>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/select2/3.5.0/select2.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.15.0/lodash.min.js"></script>
+<div>
+  <input id="search" style="width:100%;" />
+</div>
+
+<script type="text/javascript">
+
+	function searchTree(obj,search,path){
+		if(obj.name === search){
+			path.push(obj);
+			return path;
+		}
+		else if(obj.children || obj._children){
+			var children = (obj.children) ? obj.children : obj._children;
+			for(var i=0;i<children.length;i++){
+				path.push(obj);
+				var found = searchTree(children[i],search,path);
+				if(found){
+					return found;
+				}
+				else{
+					path.pop();
+				}
+			}
+		}
+		else{
+			return false;
+		}
+	}
+
+	function extract_select2_data(node,leaves,index){
+	        if (node.children){
+	            for(var i = 0;i<node.children.length;i++){
+	                index = extract_select2_data(node.children[i],leaves,index)[0];
+	            }
+	        }
+	        else {
+	            leaves.push({id:++index,text:node.name});
+	        }
+	        return [index,leaves];
+	}
+
+	var div = d3.select("body")
+		.append("div")
+		.attr("class", "tooltip")
+		.style("opacity", 0);
+
+	var margin = {top: 20, right: 120, bottom: 20, left: 120},
+		width = 2800 - margin.right - margin.left,
+		height = 1800 - margin.top - margin.bottom;
+
+	var i = 0,
+		duration = 750,
+		root,
+		select2_data;
+
+	var diameter = 960;
+
+	var tree = d3.layout.tree()
+		.size([height, width]);
+
+	var diagonal = d3.svg.diagonal()
+		.projection(function(d) { return [d.y, d.x]; });
+
+	var svg = d3.select("body").append("svg")
+		.attr("width", width + margin.right + margin.left)
+		.attr("height", height + margin.top + margin.bottom)
+	  	.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	function collapse(d) {
+		if (d.children) {
+			d._children = d.children;
+			d._children.forEach(collapse);
+			d.children = null;
+		}
+	}
+	function click(d) {
+		if (d.children) {
+			d._children = d.children;
+			d.children = null;
+	  	}
+	  	else{
+			d.children = d._children;
+			d._children = null;
+	  	}
+		update(d);
+	}
+
+	function openPaths(paths){
+		for(var i =0;i<paths.length;i++){
+			if(paths[i].id !== "1"){
+				paths[i].class = 'found';
+				if(paths[i]._children){
+					paths[i].children = paths[i]._children;
+	    			paths[i]._children = null;
+				}
+				update(paths[i]);
+			}
+		}
+	}
+
+	d3.json("data.json", function(error,values){
+		root = values;
+		select2_data = extract_select2_data(values,[],0)[1];
+    
+    $("#search").select2({
+			data: select2_data,
+      placeholder: "Search a Node",
+      minimumInputLength: 2,
+      query: function(q) {
+      var pageSize,
+        results,
+        that = this;
+      pageSize = 20;
+      results = [];
+      if (q.term && q.term !== '') {
+        results = _.filter(that.data, function(e) {
+          return e.text.toUpperCase().indexOf(q.term.toUpperCase()) >= 0;
+        });
+      } else if (q.term === '') {
+        results = that.data;
+      }
+      q.callback({
+        results: results.slice((q.page - 1) * pageSize, q.page * pageSize),
+        more: results.length >= q.page * pageSize,
+      });
+    }
+		});
+		root.x0 = height / 2;
+		root.y0 = 0;
+		root.children.forEach(collapse);
+		update(root);
+	});
+	$("#search").on("select2-selecting", function(e) {
+		var paths = searchTree(root,e.object.text,[]);
+		if(typeof(paths) !== "undefined"){
+			openPaths(paths);
+		}
+		else{
+			alert(e.object.text+" not found!");
+		}
+	})
+
+	d3.select(self.frameElement).style("height", "800px");
+
+	function update(source) {
+		var nodes = tree.nodes(root).reverse(),
+		links = tree.links(nodes);
+		nodes.forEach(function(d) { d.y = d.depth * 250; });
+		var node = svg.selectAll("g.node")
+			.data(nodes, function(d) { return d.id || (d.id = ++i); });
+		var nodeEnter = node.enter().append("g")
+			.attr("class", "node")
+		.attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+		.on("click", click);
+
+		nodeEnter.append("circle")
+		.attr("r", 1e-6)
+		.style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+		nodeEnter.append("text")
+			.attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+			.attr("dy", ".35em")
+			.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+			.text(function(d) { return d.name; })
+			.style("fill-opacity", 1e-6);
+
+		var nodeUpdate = node.transition()
+			.duration(duration)
+			.attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+		nodeUpdate.select("circle")
+			.attr("r", 4.5)
+			.style("fill", function(d) {
+				if(d.class === "found"){
+					return "#ff4136"; //red
+				}
+				else if(d._children){
+					return "lightsteelblue";
+				}
+				else{
+					return "#fff";
+				}
+			})
+			.style("stroke", function(d) {
+				if(d.class === "found"){
+					return "#ff4136"; //red
+				}
+		});
+
+		nodeUpdate.select("text")
+			.style("fill-opacity", 1);
+
+		var nodeExit = node.exit().transition()
+			.duration(duration)
+			.attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+			.remove();
+
+		nodeExit.select("circle")
+			.attr("r", 1e-6);
+
+		nodeExit.select("text")
+			.style("fill-opacity", 1e-6);
+
+		var link = svg.selectAll("path.link")
+			.data(links, function(d) { return d.target.id; });
+
+		link.enter().insert("path", "g")
+			.attr("class", "link")
+			.attr("d", function(d) {
+				var o = {x: source.x0, y: source.y0};
+				return diagonal({source: o, target: o});
+			});
+
+		link.transition()
+			.duration(duration)
+			.attr("d", diagonal)
+			.style("stroke",function(d){
+				if(d.target.class==="found"){
+					return "#ff4136";
+				}
+			});
+
+		link.exit().transition()
+			.duration(duration)
+			.attr("d", function(d) {
+				var o = {x: source.x, y: source.y};
+				return diagonal({source: o, target: o});
+			})
+			.remove();
+
+		nodes.forEach(function(d) {
+			d.x0 = d.x;
+			d.y0 = d.y;
+		  });
+	}
+</script>
+<footer style="text-align: center;">
+  <p>Done by <a href="mailto:abhilash.kr@rakuten.com">Abhilash K R</a></p>
+</footer>
+</html>
