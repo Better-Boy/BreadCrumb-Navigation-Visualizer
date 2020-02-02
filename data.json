@@ -1,0 +1,113 @@
+{
+  "children": [
+    {
+      "children": [
+        {
+          "name": "Beading & Jewelry Making"
+        },
+        {
+          "name": "Crafting"
+        },
+        {
+          "name": "Fabric"
+        },
+        {
+          "name": "Fabric Decorating"
+        },
+        {
+          "name": "Gift Wrapping Supplies"
+        },
+        {
+          "name": "Knitting & Crochet"
+        },
+        {
+          "name": "Needlework"
+        },
+        {
+          "name": "Organization, Storage & Transport"
+        },
+        {
+          "name": "Painting, Drawing & Art Supplies"
+        },
+        {
+          "name": "Party Decorations & Supplies"
+        },
+        {
+          "name": "Printmaking"
+        },
+        {
+          "name": "Scrapbooking & Stamping"
+        },
+        {
+          "name": "Sewing"
+        }
+      ],
+      "name": "Arts, Crafts & Sewing"
+    },
+    {
+      "children": [
+        {
+          "name": "Car Care"
+        },
+        {
+          "name": "Car Electronics & Accessories"
+        },
+        {
+          "name": "Exterior Accessories"
+        },
+        {
+          "name": "Interior Accessories"
+        },
+        {
+          "name": "Lights & Lighting Accessories"
+        },
+        {
+          "name": "Motorcycle & Powersports"
+        },
+        {
+          "name": "Oils & Fluids"
+        },
+        {
+          "name": "Paint & Paint Supplies"
+        },
+        {
+          "name": "RV Parts & Accessories"
+        },
+        {
+          "name": "Replacement Parts"
+        },
+        {
+          "name": "Tires & Wheels"
+        },
+        {
+          "name": "Tools & Equipment"
+        }
+      ],
+      "name": "Automotive"
+    },
+    {
+      "children": [
+        {
+          "name": "Activity & Entertainment"
+        },
+        {
+          "name": "Apparel & Accessories"
+        },
+        {
+          "name": "Baby & Toddler Toys"
+        },
+        {
+          "name": "Baby Care"
+        },
+        {
+          "name": "Baby Stationery"
+        },
+        {
+          "name": "Car Seats & Accessories"
+        }
+      ],
+      "name": "Baby Products"
+    }
+  ],
+  "name": "Home"
+}
