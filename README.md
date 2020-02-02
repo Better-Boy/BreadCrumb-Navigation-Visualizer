@@ -13,6 +13,7 @@ Put all the breadcrumb navigation in a text file. Every breadcrumb navigation sh
    `pip install anytree`
 2. Run the python program with the following command
   `python tree_generator.py --inputFilePath breadcrumbs.txt --sep "/" --nodetoexport "Home"` 
+   
    Argument Explanation:
    1. --inputFilePath - Input file containing new line delimited breadcrumb navigations
    2. --sep - Separator between the nodes of a breadcrumb navigation
