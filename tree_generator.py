@@ -8,6 +8,9 @@ NODE_DICT = {}
 ERROR_RECORDS = []
 
 def cmd_line_args():
+    """
+    Method for commond line arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--inputFilePath", required=True, help="Input Text File that contains new line delimited breadcrumbs", dest="inputFile")
     parser.add_argument("--sep", required=True, help="Separator between the levels of the breadcrumbs. Example. '-','/'", dest="sep")
@@ -16,9 +19,15 @@ def cmd_line_args():
     return parser.parse_args()
 
 def read_input_file(fpath):
+    """
+    Method to read input file
+    """
     return open(fpath).readlines()
 
 def build_tree(input_breadcrumbs, separator):
+    """
+    Method to build the tree given the breadcrumbs
+    """
     for path in input_breadcrumbs:
         try:
             path_nodes = path.strip().split(separator)
@@ -34,9 +43,15 @@ def build_tree(input_breadcrumbs, separator):
             ERROR_RECORDS.append({"record":path, "error_message": exc})
 
 def export_node(node_name, outputFileName):
+    """
+    Once the tree is built, this method exports the given node to a file
+    """
     EXPORTER.write(NODE_DICT[node_name], open(outputFileName, "w"))
 
 def save_error_records():
+    """
+    Saves error records to a file
+    """
     json.dump(ERROR_RECORDS, open("error_records.json", "w"))
 
 def start():
